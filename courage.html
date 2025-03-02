@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feel Better Soon!</title>
+    <style>
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background-color: #ffefef;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            color: #444;
+        }
+        h1 {
+            color: #ff6b88;
+            margin-bottom: 10px;
+        }
+        .message {
+            background-color: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px auto;
+            max-width: 90%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: #ff9fb0;
+            height: 80px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 2em;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+        }
+        .card-front {
+            background-color: #ff9fb0;
+        }
+        .card-back {
+            background-color: white;
+            transform: rotateY(180deg);
+        }
+        #win-message {
+            display: none;
+            font-size: 1.5em;
+            color: #ff6b88;
+            margin-top: 20px;
+            animation: bounce 0.5s infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+        .emoji {
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hey Abi! 🌟</h1>
+    
+    <div class="message">
+        <p>Even in the quiet the light shines. 🌟</p>
+        <p>Every sunflower finds the sun. 🌻</p>
+        <p>The rainbow needs the rain 🌈 </p>
+        <p>And a unicorn can carry you away! 🦄</p>
+    </div>
+    
+    <div class="game-board">
+        <!-- Cards will be added by JavaScript -->
+    </div>
+    
+    <div id="win-message">YOU DID IT! 🎉 You're amazing!</div>
+    
+    <div class="message" style="margin-top: 30px;">
+        <p>Remember: Every day you're getting stronger! 💪</p>
+        <p class="emoji">❤️ 🌟 🌈 🌻 ✨</p>
+    </div>
+
+    <script>
+        // Game emojis (6 pairs)
+        const emojis = ['🌈', '🦄', '🌻', '⭐', '🦋', '🎈'];
+        const gameEmojis = [...emojis, ...emojis];
+        
+        // Shuffle array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // Create game board
+        function createBoard() {
+            const gameBoard = document.querySelector('.game-board');
+            const shuffledEmojis = shuffle(gameEmojis);
+            
+            shuffledEmojis.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.emoji = emoji;
+                card.dataset.index = index;
+                
+                const cardFront = document.createElement('div');
+                cardFront.classList.add('card-front');
+                cardFront.textContent = '?';
+                
+                const cardBack = document.createElement('div');
+                cardBack.classList.add('card-back');
+                cardBack.textContent = emoji;
+                
+                card.appendChild(cardFront);
+                card.appendChild(cardBack);
+                
+                card.addEventListener('click', flipCard);
+                gameBoard.appendChild(card);
+            });
+        }
+        
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let canFlip = true;
+        
+        function flipCard() {
+            if (!canFlip || this.classList.contains('flipped') || flippedCards.length >= 2) return;
+            
+            this.classList.add('flipped');
+            flippedCards.push(this);
+            
+            if (flippedCards.length === 2) {
+                canFlip = false;
+                checkForMatch();
+            }
+        }
+        
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            
+            if (card1.dataset.emoji === card2.dataset.emoji) {
+                // Match found
+                card1.removeEventListener('click', flipCard);
+                card2.removeEventListener('click', flipCard);
+                matchedPairs++;
+                
+                if (matchedPairs === emojis.length) {
+                    setTimeout(() => {
+                        document.getElementById('win-message').style.display = 'block';
+                        // Add confetti or other celebration effects here
+                    }, 500);
+                }
+                
+                resetFlippedCards();
+            } else {
+                // No match
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    resetFlippedCards();
+                }, 1000);
+            }
+        }
+        
+        function resetFlippedCards() {
+            flippedCards = [];
+            canFlip = true;
+        }
+        
+        // Initialize game
+        createBoard();
+    </script>
+</body>
+</html>
